@@ -10,7 +10,7 @@
 
 using namespace std;
 
-// sample 6: 3D renderer
+// sample 6: sandbox
 class firstprogram : public sb7::application
 {
 	virtual void init()
@@ -25,7 +25,7 @@ class firstprogram : public sb7::application
 	// initialiseer 3D modellen
 	void initModels()
 	{
-		// vertex arrays
+		// vertex arra
 		std::vector<float> * plane_vertices = Objloader::getVerticesFromFile("rcplane2.obj");
 		std::vector<float> * cartesian_vertices = Objloader::getVerticesFromFile("axis_opengl.obj");
 		std::vector<float> * hill_vertices = Objloader::getVerticesFromFile("hillsv3.obj");
@@ -107,34 +107,34 @@ class firstprogram : public sb7::application
 	}
 	
 	// gebruikersinput verwerken m.b.t. oriëntatie object
-	void handleInput()
+	void handleRotation(double deltaTime)
 	{
 		Euler angles;
 		if (pitch_down == true)
 		{
-			angles.pitch = -deltaAngle;
+			angles.pitch = (float)deltaTime * -deltaAngle;
 		}
 		if (pitch_up == true)
 		{
-			angles.pitch = deltaAngle;
+			angles.pitch = (float)deltaTime * deltaAngle;
 		}
 		if (yaw_left == true)
 		{
-			angles.yaw = -deltaAngle;
+			angles.yaw = (float)deltaTime * -deltaAngle;
 		}
 		if (yaw_right == true)
 		{
-			angles.yaw = deltaAngle;
+			angles.yaw = (float)deltaTime * deltaAngle;
 		}
 		if (roll_left == true)
 		{
-			angles.roll = deltaAngle;
+			angles.roll = (float)deltaTime * deltaAngle;
 		}
 		if (roll_right == true)
 		{
-			angles.roll = -deltaAngle;
+			angles.roll = (float)deltaTime * -deltaAngle;
 		}
-		boeing_737_MAX8->turn(angles);
+		boeing_737_MAX8->rotate(angles);
 	}
 
 	// eenmalig uitvoeren bij opstarten
@@ -150,6 +150,7 @@ class firstprogram : public sb7::application
 
 		depth_range = 800.0f; // bereik; depth buffer visualisatie shader
 		depth_offset = 0.2f;  // minimale afstand; depth buffer visualisatie shader
+		oldTime = 0;
 	}
 
 	// logica per render iteratie
@@ -165,8 +166,9 @@ class firstprogram : public sb7::application
 		// maak de depth visualisatie parameters beschikbaar in de shader
 		glUniform1f(glGetUniformLocation(active_shader, "depthRange"), depth_range);
 		glUniform1f(glGetUniformLocation(active_shader, "depthOffset"), depth_offset);
-
-		handleInput(); // rotaties afhandelen op basis van actieve gebruikersinput
+		
+		handleRotation(currentTime - oldTime); // rotaties uitvoeren op basis van tijd
+		oldTime = currentTime;
 
 		light_source->attach(active_shader); // licht koppelen aan het shader programma				
 		active_camera->attach(active_shader); // camera koppelen aan het shader programma
@@ -345,8 +347,9 @@ private:
 	Model * hills;
 	Model * buildings;
 
-	const float deltaAngle = 0.1f;
+	const float deltaAngle = 80.0f;
 	const float deltaSpeed = 0.0005f;
+	double oldTime;
 
 	const vmath::vec3 scenery_position = vmath::vec3(0.0f, -60.0f, 0.0f); // positie van het landschap
 	const float fixed_scale = 1.0f / 1000.0f; // schaal 1 : 1000
