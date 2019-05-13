@@ -140,7 +140,7 @@ void Model::accelerate(float factor)
 	speed += factor;
 }
 
-void Model::turn(Euler angles)
+void Model::rotate(Euler angles)
 {
 	// "tijdelijk" rotatie quaternion
 	Quaternion rotation; 
