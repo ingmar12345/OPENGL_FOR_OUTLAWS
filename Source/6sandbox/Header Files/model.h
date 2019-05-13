@@ -40,7 +40,7 @@ public:
 
 	// interactie functies
 	void accelerate(float delta);
-	void turn(Euler delta);
+	void rotate(Euler delta);
 
 private:
 	// initialiseert vertex objecten en pointers
