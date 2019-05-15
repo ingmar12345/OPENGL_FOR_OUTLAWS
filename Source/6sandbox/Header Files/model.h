@@ -19,7 +19,7 @@ public:
 	~Model();
 
 	// render logica
-	void render(GLuint& shader_program);
+	void render(GLuint& shader_program, double delta_time);
 
 	// opruim protocol
 	void cleanup();
