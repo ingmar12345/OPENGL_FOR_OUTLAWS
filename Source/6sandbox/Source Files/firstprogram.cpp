@@ -46,19 +46,19 @@ class firstprogram : public sb7::application
 		delete(hill_vertices);
 		delete(building_vertices);
 	}
-	
+
 	// initialiseer cameras
 	void initCameras()
 	{
 		Projection projection; // projectie parameters of 'lens'
 
-		// projectie parameters instellen
+							   // projectie parameters instellen
 		projection.view_angle_degrees = 90.0f;  // frustum hoek
-		projection.aspect_ratio = 16/9;         // beeldverhouding / aspect ratio                
+		projection.aspect_ratio = 16 / 9;         // beeldverhouding / aspect ratio                
 		projection.near_plane = 0.2f;           // minimale afstand frustum
 		projection.far_plane = 10000.0f;      // maximale afstand frustum
 
-		// stilstaande camera
+											  // stilstaande camera
 		static_camera = new StaticCamera(
 			projection,                    // projectie parameters of 'lens'
 			vmath::vec3(2.0f, 2.0f, 2.0f), // camera positie
@@ -92,7 +92,7 @@ class firstprogram : public sb7::application
 		light_source = new Light(
 			vmath::vec3(1.0f, 400.0f, 100.0f), // licht positie
 			vmath::vec3(200, 400, 200)         // kijk positie
-		);	
+		);
 	}
 
 	// initialiseer shaders
@@ -105,34 +105,34 @@ class firstprogram : public sb7::application
 		depth = new Shader("depth_vertex.glsl", "depth_fragment.glsl", "depth_geometry.glsl");
 		active_shader = phong->getProgram(); // standaard shader
 	}
-	
+
 	// gebruikersinput verwerken m.b.t. oriëntatie object
-	void handleRotation(double deltaTime)
+	void handleRotation(double delta_time)
 	{
 		Euler angles;
 		if (pitch_down == true)
 		{
-			angles.pitch = (float)deltaTime * -deltaAngle;
+			angles.pitch = (float)delta_time * -delta_angle;
 		}
 		if (pitch_up == true)
 		{
-			angles.pitch = (float)deltaTime * deltaAngle;
+			angles.pitch = (float)delta_time * delta_angle;
 		}
 		if (yaw_left == true)
 		{
-			angles.yaw = (float)deltaTime * -deltaAngle;
+			angles.yaw = (float)delta_time * -delta_angle;
 		}
 		if (yaw_right == true)
 		{
-			angles.yaw = (float)deltaTime * deltaAngle;
+			angles.yaw = (float)delta_time * delta_angle;
 		}
 		if (roll_left == true)
 		{
-			angles.roll = (float)deltaTime * deltaAngle;
+			angles.roll = (float)delta_time * delta_angle;
 		}
 		if (roll_right == true)
 		{
-			angles.roll = (float)deltaTime * -deltaAngle;
+			angles.roll = (float)delta_time * -delta_angle;
 		}
 		boeing_737_MAX8->rotate(angles);
 	}
@@ -157,29 +157,31 @@ class firstprogram : public sb7::application
 	virtual void render(double currentTime)
 	{
 		glClearColor(0.6f, 0.9f, 1.0f, 1.0f); // achtergrond kleur
-											  
-		// framebuffer opschonen (depth buffer en color buffer)
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+
+											  // framebuffer opschonen (depth buffer en color buffer)
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(active_shader); // shader programma toewijzen
 
-		// maak de depth visualisatie parameters beschikbaar in de shader
+									 // maak de depth visualisatie parameters beschikbaar in de shader
 		glUniform1f(glGetUniformLocation(active_shader, "depthRange"), depth_range);
 		glUniform1f(glGetUniformLocation(active_shader, "depthOffset"), depth_offset);
-		
-		handleRotation(currentTime - oldTime); // rotaties uitvoeren op basis van tijd
-		oldTime = currentTime;
+
+		delta_time = currentTime - old_time;
+		old_time = currentTime;
+
+		handleRotation(delta_time); // rotaties uitvoeren op basis van tijd
 
 		light_source->attach(active_shader); // licht koppelen aan het shader programma				
 		active_camera->attach(active_shader); // camera koppelen aan het shader programma
 
-		// render logica uitvoeren voor model instanties
-		boeing_737_MAX8->render(active_shader);
-		cartesian_axis->render(active_shader);
-		hills->render(active_shader);
-		buildings->render(active_shader);
+											  // render logica uitvoeren voor model instanties
+		boeing_737_MAX8->render(active_shader, delta_time);
+		cartesian_axis->render(active_shader, delta_time);
+		hills->render(active_shader, delta_time);
+		buildings->render(active_shader, delta_time);
 	}
-	
+
 	// afsluit protocol
 	virtual void shutdown()
 	{
@@ -192,7 +194,7 @@ class firstprogram : public sb7::application
 		delete(cartesian_axis);
 		delete(hills);
 		delete(buildings);
-		
+
 		delete(light_source);
 
 		delete(static_camera);
@@ -272,10 +274,10 @@ class firstprogram : public sb7::application
 			}
 			break;
 		case GLFW_KEY_W:
-			boeing_737_MAX8->accelerate(deltaSpeed);
+			boeing_737_MAX8->accelerate(delta_speed);
 			break;
 		case GLFW_KEY_S:
-			boeing_737_MAX8->accelerate(-deltaSpeed);
+			boeing_737_MAX8->accelerate(-delta_speed);
 			break;
 		case GLFW_KEY_C:
 			boeing_737_MAX8->printPosition();
@@ -327,10 +329,10 @@ private:
 	Shader * phong;
 	Shader * gourad;
 	Shader * flat;
-	Shader * depth; 
+	Shader * depth;
 	float depth_range;
 	float depth_offset;
-	GLuint active_shader; 
+	GLuint active_shader;
 
 	// belichtings parameters
 	Light * light_source;
@@ -347,9 +349,9 @@ private:
 	Model * hills;
 	Model * buildings;
 
-	const float deltaAngle = 80.0f;
-	const float deltaSpeed = 0.0005f;
-	double oldTime;
+	const float delta_angle = 80.0f;
+	const float delta_speed = 0.5f;
+	double old_time, delta_time;
 
 	const vmath::vec3 scenery_position = vmath::vec3(0.0f, -60.0f, 0.0f); // positie van het landschap
 	const float fixed_scale = 1.0f / 1000.0f; // schaal 1 : 1000
