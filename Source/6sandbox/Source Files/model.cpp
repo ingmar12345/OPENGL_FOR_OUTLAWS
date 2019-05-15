@@ -85,9 +85,9 @@ void Model::initVertices()
 	glBindVertexArray(0);
 }
 
-void Model::render(GLuint& shader_program)
+void Model::render(GLuint& shader_program, double delta_time)
 {
-	position += vmath::vec3(forward_local[0], forward_local[1], forward_local[2]) * speed;
+	position += vmath::vec3(forward_local[0], forward_local[1], forward_local[2]) * (delta_time * speed);
 	translation_matrix = vmath::translate(position);
 
 	model_matrix = translation_matrix * rotation_matrix * scaling_matrix;
